@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Buster's Feedback</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#CC1F1A;--redL:#FEF2F1;
+  --dark:#111;--body:#3A3A3A;--muted:#8A8A8A;--border:#E6E6E4;--bg:#F6F6F4;--green:#22C55E;
+}
+@keyframes bpPop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes bpUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bpDot{0%,100%{transform:translateY(0);opacity:.3}50%{transform:translateY(-5px);opacity:1}}
+html,body{
+  height:100%;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+}
+.shell{
+  width:100%;max-width:420px;height:640px;
+  display:flex;flex-direction:column;
+  border-radius:24px;overflow:hidden;
+  box-shadow:0 12px 56px rgba(0,0,0,.14);
+  background:#fff;
+}
+@media(max-width:480px){
+  html,body{padding:0;align-items:stretch}
+  .shell{max-width:100%;height:100dvh;height:100vh;border-radius:0;box-shadow:none}
+  .hdr{padding-top:max(14px,env(safe-area-inset-top)) !important}
+  .ibar{padding-bottom:max(12px,env(safe-area-inset-bottom)) !important}
+}
+.hdr{
+  background:var(--red);padding:14px 16px 12px;
+  display:flex;align-items:center;gap:11px;flex-shrink:0;
+}
+.hav{
+  width:40px;height:40px;border-radius:50%;flex-shrink:0;
+  background:rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;line-height:1;
+}
+.hname{color:#fff;font-weight:700;font-size:14px;letter-spacing:-.3px}
+.hstatus{display:flex;align-items:center;gap:5px;margin-top:2px;color:rgba(255,255,255,.65);font-size:11px}
+.hdot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0}
+.hlink{margin-left:auto;color:rgba(255,255,255,.5);font-size:11px;text-decoration:none;white-space:nowrap}
+.prog-track{height:3px;background:#F0EEEC;flex-shrink:0}
+.prog-fill{height:100%;background:var(--red);border-radius:0 2px 2px 0;transition:width .5s cubic-bezier(.4,0,.2,1);width:0%}
+.msgs{
+  flex:1;overflow-y:auto;padding:16px 14px;
+  display:flex;flex-direction:column;gap:10px;
+  background:#F9F9F7;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+}
+.msgs::-webkit-scrollbar{width:3px}
+.msgs::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:3px}
+.bot-row{display:flex;align-items:flex-end;gap:8px;animation:bpPop .28s cubic-bezier(.34,1.5,.64,1) forwards;opacity:0}
+.bot-av{width:30px;height:30px;border-radius:50%;flex-shrink:0;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;margin-bottom:2px}
+.bot-b{background:#fff;border:1px solid var(--border);border-radius:16px 16px 16px 3px;padding:10px 14px;max-width:78%;font-size:14px;color:var(--body);line-height:1.55;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.user-row{display:flex;justify-content:flex-end;animation:bpPop .22s cubic-bezier(.34,1.5,.64,1) forwards;opacity:0}
+.user-b{background:var(--red);border-radius:16px 16px 3px 16px;padding:10px 14px;max-width:72%;font-size:14px;color:#fff;line-height:1.55}
+.typing-b{background:#fff;border:1px solid var(--border);border-radius:16px 16px 16px 3px;padding:12px 15px;display:flex;gap:5px;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.dot{width:6px;height:6px;border-radius:50%;background:#C8C8C8}
+.ibar{border-top:1px solid var(--border);background:#fff;padding:12px 14px;flex-shrink:0}
+.stars{display:flex;gap:3px}
+.star{background:none;border:none;cursor:pointer;padding:2px 3px;font-size:32px;color:#E0E0E0;transition:color .1s,transform .13s;line-height:1;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.star.on{color:var(--red)}
+.star-lbl{height:17px;margin-top:4px;font-size:12px;font-weight:600;color:var(--red);opacity:0;transition:opacity .15s;letter-spacing:.2px}
+.star-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.send-btn{background:var(--red);border:none;border-radius:22px;color:#fff;font-size:14px;font-weight:600;padding:11px 24px;cursor:pointer;flex-shrink:0;font-family:inherit;margin-top:2px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.send-btn:active{opacity:.82;transform:scale(.96)}
+.text-row{display:flex;gap:8px;align-items:flex-end}
+.ta{flex:1;resize:none;font-family:inherit;border:1.5px solid var(--border);border-radius:14px;padding:10px 13px;font-size:15px;color:var(--body);line-height:1.45;background:#fff;outline:none;transition:border-color .14s;-webkit-appearance:none}
+.ta:focus{border-color:var(--red)}
+.send-up{background:var(--red);border:none;border-radius:22px;color:#fff;font-size:18px;font-weight:600;padding:10px 15px;cursor:pointer;flex-shrink:0;font-family:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.send-up:active{opacity:.82;transform:scale(.96)}
+.skip-btn{background:none;border:none;cursor:pointer;font-size:12.5px;color:var(--muted);padding:2px;text-decoration:underline;text-underline-offset:2px;font-family:inherit;display:block;margin:6px 0 0 auto;-webkit-tap-highlight-color:transparent}
+.sms-row{display:flex;gap:8px}
+.sms-yes{flex:1;padding:13px 12px;background:var(--red);border:1.5px solid var(--red);border-radius:22px;font-size:14px;font-weight:600;color:#fff;cursor:pointer;font-family:inherit;touch-action:manipulation}
+.sms-yes:active{opacity:.82}
+.sms-no{flex:1;padding:13px 12px;background:#fff;border:1.5px solid var(--border);border-radius:22px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;font-family:inherit;touch-action:manipulation;transition:border-color .14s,color .14s}
+.sms-no:active{border-color:var(--red);color:var(--red)}
+.coupon-wrap{margin-left:38px;animation:bpUp .36s ease forwards;opacity:0}
+.coupon{background:#fff;border:1.5px dashed var(--red);border-radius:16px;padding:18px 20px;max-width:262px;text-align:center;box-shadow:0 2px 18px rgba(204,31,26,.08)}
+.c-icon{font-size:28px;line-height:1}
+.c-title{font-weight:700;font-size:15px;color:var(--dark);margin-top:8px}
+.c-code{margin:11px 0 8px;background:var(--redL);border-radius:10px;padding:9px 16px;font-family:'Courier New',monospace;font-size:20px;font-weight:700;color:var(--red);letter-spacing:3px}
+.c-fine{font-size:11px;color:var(--muted);margin-bottom:13px}
+.c-cta{display:inline-block;background:var(--red);color:#fff;border-radius:22px;padding:8px 22px;font-size:13px;font-weight:600;text-decoration:none}
+.thanks-wrap{margin-left:38px;animation:bpUp .36s ease forwards;opacity:0}
+.thanks-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:16px 18px;max-width:284px}
+.t-p{font-size:13.5px;color:var(--body);line-height:1.6;margin-bottom:13px}
+.check-row{display:flex;align-items:flex-start;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.chkbox{width:18px;height:18px;border-radius:5px;flex-shrink:0;margin-top:2px;border:2px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.chkbox.on{border-color:var(--red);background:var(--red)}
+.check-lbl{font-size:13.5px;color:var(--body);line-height:1.5}
+.gbtn{display:inline-flex;align-items:center;gap:7px;background:#4285F4;color:#fff;border-radius:22px;padding:9px 18px;font-size:13px;font-weight:600;text-decoration:none;margin-top:12px;animation:bpUp .2s ease forwards;opacity:0}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="hdr">
+    <div class="hav">🍕</div>
+    <div>
+      <div class="hname">Buster's Pizza &amp; Donair</div>
+      <div class="hstatus"><span class="hdot"></span>Quick feedback · 60 seconds</div>
+    </div>
+    <a class="hlink" href="https://www.busterspizza.ca" target="_blank">busterspizza.ca ↗</a>
+  </div>
+  <div class="prog-track"><div class="prog-fill" id="prog"></div></div>
+  <div class="msgs" id="msgs"></div>
+  <div class="ibar" id="ibar" style="display:none"></div>
+</div>
+
+<script>
+const FLOW=[
+  {id:"intro",type:"bot-only",bot:["Hey! 👋 Thanks for coming into Buster's.","Got 60 seconds? We'd love to hear how it went."],autoNext:700},
+  {id:"food_rating",type:"star",bot:"How would you rate the taste and quality of your food?"},
+  {id:"food_comment",type:"text",optional:true,bot:"Got it! Anything you'd like us to know — what you loved or what we could improve?",ph:"e.g. The donair sauce was amazing 🔥"},
+  {id:"service_rating",type:"star",bot:"How satisfied are you with the overall service?"},
+  {id:"service_comment",type:"text",optional:true,bot:"Any names to shout out or moments we should know about?",ph:"e.g. The person at the front was super helpful"},
+  {id:"sms",type:"sms",bot:"Last thing — want to hear about our deals and specials over text?"},
+  {id:"coupon",type:"coupon",bot:"You're a legend 🙌 Here's something for next time:"},
+  {id:"thanks",type:"thanks",bot:"That's all — seriously appreciate the feedback. See you soon! 🍕"},
+];
+const LABELS=["Terrible","Poor","Okay","Good","Amazing!"];
+const qSteps=FLOW.filter(s=>["star","text","sms"].includes(s.type));
+const TOTAL_Q=qSteps.length;
+const msgsEl=document.getElementById("msgs");
+const ibarEl=document.getElementById("ibar");
+const progEl=document.getElementById("prog");
+let stepIdx=-1,starVal=0,lock=false;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const scroll=()=>setTimeout(()=>msgsEl.scrollTop=msgsEl.scrollHeight,50);
+
+function setProgress(idx){
+  const qi=qSteps.findIndex(s=>s.id===(FLOW[idx]||{}).id);
+  progEl.style.width=(qi>=0?Math.round((qi/TOTAL_Q)*100):0)+"%";
+}
+async function pushBot(text){
+  ibarEl.style.display="none";
+  const tr=document.createElement("div");tr.className="bot-row";
+  tr.innerHTML=`<div class="bot-av">🍕</div><div class="typing-b"><div class="dot" style="animation:bpDot 1s 0s ease-in-out infinite"></div><div class="dot" style="animation:bpDot 1s .18s ease-in-out infinite"></div><div class="dot" style="animation:bpDot 1s .36s ease-in-out infinite"></div></div>`;
+  msgsEl.appendChild(tr);scroll();
+  await sleep(Math.min(460+text.length*11,1050));
+  msgsEl.removeChild(tr);
+  const row=document.createElement("div");row.className="bot-row";
+  row.innerHTML=`<div class="bot-av">🍕</div><div class="bot-b">${text}</div>`;
+  msgsEl.appendChild(row);scroll();
+  await sleep(60);
+}
+function pushUser(text){
+  const row=document.createElement("div");row.className="user-row";
+  row.innerHTML=`<div class="user-b">${text}</div>`;
+  msgsEl.appendChild(row);scroll();
+}
+async function goTo(idx){
+  if(idx>=FLOW.length||lock)return;
+  lock=true;stepIdx=idx;starVal=0;
+  setProgress(idx);
+  const s=FLOW[idx];
+  for(const l of(Array.isArray(s.bot)?s.bot:[s.bot]))await pushBot(l);
+  if(s.type==="bot-only"){lock=false;await sleep(s.autoNext||500);goTo(idx+1);return;}
+  if(s.type==="coupon"){renderCoupon();lock=false;await sleep(1300);goTo(idx+1);return;}
+  if(s.type==="thanks"){renderThanks();progEl.style.width="100%";lock=false;return;}
+  lock=false;renderInput(s);
+}
+async function submit(txt,next){pushUser(txt);ibarEl.style.display="none";await sleep(200);goTo(next);}
+
+function renderInput(s){
+  ibarEl.innerHTML="";ibarEl.style.display="block";
+  if(s.type==="star"){
+    const wrap=document.createElement("div");
+    const row=document.createElement("div");row.className="star-row";
+    const left=document.createElement("div");
+    const sr=document.createElement("div");sr.className="stars";
+    const lbl=document.createElement("div");lbl.className="star-lbl";
+    const upd=hov=>{
+      const a=hov||starVal;
+      sr.querySelectorAll(".star").forEach((b,i)=>{
+        b.className="star"+(i<a?" on":"");
+        b.style.transform=(i+1===a)?"scale(1.22)":"scale(1)";
+      });
+      lbl.style.opacity=a?1:0;
+      lbl.textContent=a?LABELS[a-1]:"";
+    };
+    for(let i=1;i<=5;i++){
+      const b=document.createElement("button");b.className="star";b.textContent="★";
+      b.onmouseenter=()=>upd(i);b.onmouseleave=()=>upd(0);
+      b.ontouchstart=e=>{e.preventDefault();starVal=i;upd(0);};
+      b.onclick=()=>{starVal=i;upd(0);};
+      sr.appendChild(b);
+    }
+    left.appendChild(sr);left.appendChild(lbl);
+    const btn=document.createElement("button");btn.className="send-btn";btn.textContent="Send";
+    btn.onclick=()=>{
+      if(!starVal){lbl.textContent="Please pick a rating";lbl.style.opacity=1;return;}
+      submit("★".repeat(starVal)+"  "+LABELS[starVal-1],stepIdx+1);
+    };
+    row.appendChild(left);row.appendChild(btn);wrap.appendChild(row);ibarEl.appendChild(wrap);
+  }
+  if(s.type==="text"){
+    const wrap=document.createElement("div");
+    const row=document.createElement("div");row.className="text-row";
+    const ta=document.createElement("textarea");ta.className="ta";ta.rows=2;ta.placeholder=s.ph||"";
+    ta.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}};
+    const up=document.createElement("button");up.className="send-up";up.textContent="↑";
+    const send=(skip=false)=>submit(skip||!ta.value.trim()?"No comment":ta.value.trim(),stepIdx+1);
+    up.onclick=()=>send();
+    row.appendChild(ta);row.appendChild(up);wrap.appendChild(row);
+    if(s.optional){
+      const sk=document.createElement("button");sk.className="skip-btn";sk.textContent="Skip";
+      sk.onclick=()=>send(true);wrap.appendChild(sk);
+    }
+    ibarEl.appendChild(wrap);
+    setTimeout(()=>ta.focus(),80);
+  }
+  if(s.type==="sms"){
+    const row=document.createElement("div");row.className="sms-row";
+    const y=document.createElement("button");y.className="sms-yes";y.textContent="Yes, send me deals!";
+    const n=document.createElement("button");n.className="sms-no";n.textContent="No thanks";
+    y.onclick=()=>submit("Yes, keep me in! 📲",stepIdx+1);
+    n.onclick=()=>submit("No thanks, opt me out",stepIdx+1);
+    row.appendChild(y);row.appendChild(n);ibarEl.appendChild(row);
+  }
+}
+function renderCoupon(){
+  const w=document.createElement("div");w.className="coupon-wrap";
+  w.innerHTML=`<div class="coupon"><div class="c-icon">🎁</div><div class="c-title">10% off your next order</div><div class="c-code">BUSTER10</div><div class="c-fine">Valid in-store &amp; online · 30 days</div><a class="c-cta" href="https://busterspizza.olo.com/" target="_blank">Order online ↗</a></div>`;
+  msgsEl.appendChild(w);scroll();
+}
+function renderThanks(){
+  const w=document.createElement("div");w.className="thanks-wrap";
+  const card=document.createElement("div");card.className="thanks-card";
+  const p=document.createElement("p");p.className="t-p";
+  p.textContent="Enjoyed your visit? A quick Google review helps other locals find us — and means the world to our team. 🙏";
+  const cr=document.createElement("div");cr.className="check-row";
+  const cb=document.createElement("div");cb.className="chkbox";
+  const lbl=document.createElement("span");lbl.className="check-lbl";lbl.textContent="Yes, I'll leave a Google review!";
+  let chk=false;
+  cr.onclick=()=>{
+    chk=!chk;cb.className="chkbox"+(chk?" on":"");
+    cb.innerHTML=chk?`<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`:"";
+    if(chk&&!card.querySelector(".gbtn")){
+      const a=document.createElement("a");a.className="gbtn";
+      a.href="https://g.page/r/busterspizza/review";a.target="_blank";
+      a.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Leave a Google review`;
+      card.appendChild(a);scroll();
+    }
+    if(!chk){const a=card.querySelector(".gbtn");if(a)a.remove();}
+  };
+  cr.appendChild(cb);cr.appendChild(lbl);
+  card.appendChild(p);card.appendChild(cr);
+  w.appendChild(card);msgsEl.appendChild(w);scroll();
+}
+goTo(0);
+</script>
+</body>
+</html>
